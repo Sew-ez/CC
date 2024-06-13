@@ -1,16 +1,16 @@
 from pydantic import BaseModel
 from typing import Dict
 
-class registrationForm(BaseModel):
+class RegistrationForm(BaseModel):
     profilename: str
     username:str
     password:str
 
-class ukuran(BaseModel):
+class Ukuran(BaseModel):
     s: int
     m: int
 
-class orderForm(BaseModel):
+class OrderForm(BaseModel):
     apikey: str
     jenisbahan: int
     warna: int
