@@ -1,11 +1,11 @@
-from function.classes import registrationForm
+from function.classes import RegistrationForm
 from fastapi import Response
 from .database import runDB, DBtoDict
 from uuid import uuid4
 import bcrypt
 
 
-def authRegister(response: Response, registrationForm: registrationForm):
+def authRegister(response: Response, registrationForm: RegistrationForm):
     registrationFormData = registrationForm.model_dump()
     username = str(registrationFormData["username"])
     profileName = str(registrationFormData["profilename"])
