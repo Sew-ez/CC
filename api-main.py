@@ -1,71 +1,84 @@
+#############################################################################
+#
+#   [AUTH]
+#   GET /auth/login?username={your_username}&password={your_password}
+#   GET /auth/logout?apikey={your_api_key}
+#   POST /auth/register
+#       [Body]
+#       {
+#         "profilename"="{your_name}",
+#         "username"="{your_username}"",
+#         "password"="{your_password}",
+#       }
+# 
+#   [HOME]
+#   GET /home?apikey={your_api_key}
+#
+#   [ORDER]
+#   
+#
+#
+
+
+
+
+
 from typing import Union
 from fastapi import FastAPI, Response, status
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.auth import authLogin, authLogout
+from function.order import getCart
+from function.auth import authLogin, authLogout, authRegister
+from function.classes import registrationForm, orderForm
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-@app.get("/home/{oAuthToken}", status_code=200)
-def home(response: Response, oAuthToken: str):
-    return getHome(response, oAuthToken)
-
-
-
-
-@app.get("/cart/{jwt}", status_code=200)
-def getCart(response: Response, jwt: str = ""):
-    user_db = {
-        "ByhUAbsfybu12vb8fy13bfOF": {
-            "cart": [
-                {
-                    "id": 1,
-                    "name": "T-Shirt",
-                    "icon": ""
-                },
-                {
-                    "id": 2,
-                    "name": "Jacket",
-                    "icon": ""
-                },
-                {
-                    "id": 3,
-                    "name": "Tote-Bag",
-                    "icon": ""
-                },
-                {
-                    "id": 4,
-                    "name": "Cap",
-                    "icon": ""
-                },
-            ]
-        }
-    }
-    if(jwt==""):
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {
-            "status": 401,
-            "message": "Unauthorized"
-        }
-    else:
-        return {
-            "status": 200,
-            "cart": user_db[jwt]["cart"]
-        }
-
-
-
-
-# AUTH
-@app.get("/auth/login/{username}/{password}", status_code=200)
+#################################################################
+#                              AUTH                             #
+#################################################################
+@app.get("/auth/login", status_code=200)
 def login(response: Response, username: str = "", password: str = ""):
     return authLogin(username=username, password=password)
 
-@app.get("/auth/logout/{oAuthToken}", status_code=200)
-def login(response: Response, username: str = "", oAuthToken: str = ""):
-    return authLogout(oAuthToken=oAuthToken)
+@app.get("/auth/logout", status_code=200)
+def logout(response: Response, username: str = "", apiKey: str = ""):
+    return authLogout(apiKey=apiKey)
+
+@app.post("/auth/register", status_code=200)
+def register(response: Response, registrationForm: registrationForm):
+    return authRegister(response=response, registrationForm=registrationForm)
+
+#################################################################
+#                           HOME PAGE                           #
+#################################################################
+@app.get("/home", status_code=200)
+def home(response: Response, apiKey: str):
+    return getHome(response, apiKey)
+
+#################################################################
+#                            ORDERING                           #
+#################################################################
+
+@app.get("/cart", status_code=200)
+def cart(response: Response, apiKey: str = ""):
+    return getCart(response=response, apiKey=apiKey)
+
+@app.get("/order", status_code=200)
+def order(response: Response, apiKey: str = ""):
+    return getOrder()
+
+@app.post("/order", status_code=200)
+def cart(response: Response, apiKey: str = "", orderForm: orderForm = {}):
+    return getCart(response=response, apiKey=apiKey, orderForm=orderForm)
+
+@app.get("/orderoverview", status_code=200)
+
+
+#################################################################
+#                            ORDERING                           #
+#################################################################
+@app.get("/payment", status_code=200)
