@@ -22,9 +22,9 @@ def getOrderForm(response: Response, apiKey: str, productType: int):
             "message": "Unauthorized"
         }
     stock_query, stock_column = runDB("""
-                                        SELECT 'color' AS attribute, color AS value
+                                        SELECT 'color' AS attribute, id, value
                                         FROM (
-                                            SELECT DISTINCT stock_color.color AS color
+                                            SELECT DISTINCT stock_color.id AS id, stock_color.color AS value
                                             FROM stock
                                             LEFT JOIN stock_color ON stock.color = stock_color.id
                                             WHERE stock.`type` = %s
@@ -32,9 +32,9 @@ def getOrderForm(response: Response, apiKey: str, productType: int):
 
                                         UNION ALL
 
-                                        SELECT 'type' AS attribute, `type` AS value
+                                        SELECT 'type' AS attribute, id, value
                                         FROM (
-                                            SELECT DISTINCT stock_type.`type` AS `type`
+                                            SELECT DISTINCT stock_type.id AS id, stock_type.`type` AS value
                                             FROM stock
                                             LEFT JOIN stock_type ON stock.`type` = stock_type.id
                                             WHERE stock.`type` = %s
@@ -42,9 +42,9 @@ def getOrderForm(response: Response, apiKey: str, productType: int):
 
                                         UNION ALL
 
-                                        SELECT 'size' AS attribute, size AS value
+                                        SELECT 'size' AS attribute, id, value
                                         FROM (
-                                            SELECT DISTINCT stock_size.size AS size
+                                            SELECT DISTINCT stock_size.id AS id, stock_size.size AS value
                                             FROM stock
                                             LEFT JOIN stock_size ON stock.size = stock_size.id
                                             WHERE stock.`type` = %s
@@ -52,13 +52,13 @@ def getOrderForm(response: Response, apiKey: str, productType: int):
 
                                         UNION ALL
 
-                                        SELECT 'fabric' AS attribute, fabric AS value
+                                        SELECT 'fabric' AS attribute, id, value
                                         FROM (
-                                            SELECT DISTINCT stock_fabric.fabric AS fabric
+                                            SELECT DISTINCT stock_fabric.id AS id, stock_fabric.fabric AS value
                                             FROM stock
                                             LEFT JOIN stock_fabric ON stock.fabric = stock_fabric.id
                                             WHERE stock.`type` = %s
-                                        ) AS t4;
+                                        ) AS t4
                                               """, (productType,productType,productType,productType))
     stock = DBtoDict(stock_query, stock_column)
     print(stock)
@@ -66,7 +66,9 @@ def getOrderForm(response: Response, apiKey: str, productType: int):
     for row in stock:
         if row['attribute'] not in orderFormData:
             orderFormData[row['attribute']] = []
-        orderFormData[row['attribute']].append(row['value'])
+        orderFormData[row['attribute']].append({
+            row['id']:row['value']
+        })
     return orderFormData
 
 
