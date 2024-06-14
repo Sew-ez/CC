@@ -9,7 +9,7 @@ import bcrypt
 def authRegister(response: Response, registrationForm: RegistrationForm):
     registrationFormData = registrationForm.model_dump()
     email = str(registrationFormData["email"])
-    profileName = str(registrationFormData["profilename"])
+    profileName = str(registrationFormData["name"])
     password = str(registrationFormData["password"])
     if(email == "" or profileName == "" or password == ""):
         response.status_code=400
