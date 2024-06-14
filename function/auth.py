@@ -117,7 +117,7 @@ def authCheck(sessionToken):
     if len(user) > 0:
         return {
             "login": True,
-            "userName": user[0]['username'],
+            "email": user[0]['email'],
             "profileName": user[0]['name']
         }
     else:
