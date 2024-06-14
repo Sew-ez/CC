@@ -11,7 +11,7 @@ class LoginForm(BaseModel):
     password:str
 
 class LogoutForm(BaseModel):
-    sessionToken:str
+    token:str
 
 class Ukuran(BaseModel):
     s: int

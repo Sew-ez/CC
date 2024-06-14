@@ -91,7 +91,7 @@ def authLogin(loginForm: LoginForm):
     
 def authLogout(logoutForm: LogoutForm):
     logoutFormData = logoutForm.model_dump()
-    sessionToken = str(logoutFormData["sessionToken"])
+    sessionToken = str(logoutFormData["token"])
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
@@ -106,8 +106,12 @@ def authLogout(logoutForm: LogoutForm):
             "message": "Session not found"
         }
 
-def authCheck(sessionToken):
-    if sessionToken == "" or not "Bearer" in sessionToken:
+def authCheck(sessionToken:str = ""):
+    if sessionToken == "" or not type(sessionToken)=="String":
+        return {
+            "login": False
+        }
+    elif not "Bearer" in sessionToken:
         return {
             "login": False
         }
@@ -118,7 +122,8 @@ def authCheck(sessionToken):
         return {
             "login": True,
             "email": user[0]['email'],
-            "profileName": user[0]['name']
+            "profileName": user[0]['name'],
+            "sessionToken": user[0]['sessionToken']
         }
     else:
         return {
