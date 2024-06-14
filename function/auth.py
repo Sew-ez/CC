@@ -41,8 +41,8 @@ def authRegister(response: Response, registrationForm: RegistrationForm):
         salt = bcrypt.gensalt()
         password_b = password.encode('utf-8')
         hashed = bcrypt.hashpw(password_b, salt).decode('utf-8')
-        runDB("INSERT INTO Auth_User (username, name, password) VALUES (%s, %s, %s)", (email, profileName, hashed))
-        user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (email,))
+        runDB("INSERT INTO Auth_User (email, name, password) VALUES (%s, %s, %s)", (email, profileName, hashed))
+        user_query, user_column = runDB("SELECT * FROM Auth_User WHERE email = %s", (email,))
         user = DBtoDict(user_query, user_column)
         if len(user) > 0:
             encrypted_passwd = user[0]['password']
