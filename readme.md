@@ -9,8 +9,6 @@
 
 ### AUTHENTICATION
 
-<br>
-
 ### [ Login Endpoint ]
 
 **URL:** `https://api.sewez.shop/auth/login`
@@ -67,8 +65,8 @@
 
 ```json
 {
-    "error": False,
-    "message": "Successfully logged out"
+  "error": false,
+  "message": "Successfully logged out"
 }
 ```
 
@@ -100,7 +98,7 @@
 
 ```json
 {
-    "error": False,
-    "message": "Successfully registered"
+  "error": false,
+  "message": "Successfully registered"
 }
 ```
