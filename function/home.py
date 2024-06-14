@@ -2,14 +2,15 @@ from fastapi import FastAPI, Response, status
 from function.database import runDB, DBtoDict
 from function.auth import authCheck
 
-def getHome(response: Response, oAuthToken: str):
-    auth = authCheck(oAuthToken)
+def getHome(response: Response, sessionToken: str):
+    auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
             "status": 401,
             "message": "Unauthorized"
         }
+    
     # Get Showcase
     showcase_query, showcase_column = runDB("SELECT * FROM Home_Showcase")
     showcase = DBtoDict(showcase_query, showcase_column)
