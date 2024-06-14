@@ -27,7 +27,7 @@ from typing import Union, Annotated
 from fastapi import FastAPI, Response, Request, status, Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.order import getCart, getOrderForm
+from function.order import getCart, getOrderForm, pushOrder
 from function.auth import authLogin, authLogout, authRegister
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm
 from dotenv import load_dotenv
@@ -64,16 +64,16 @@ def home(request: Request, response: Response):
 #################################################################
 
 @app.get("/cart", status_code=200)
-def cart(request: Request, response: Response, token: str = ""):
-    return getCart(response=response, sessionToken=token)
+def cart(request: Request, response: Response):
+    return getCart(response=response, request=request)
 
 @app.get("/order", status_code=200)
-def order(request: Request, response: Response, token: str = "", producttype: str = ""):
-    return getOrderForm(response=response, sessionToken=token, productType=producttype)
+def order(request: Request, response: Response, producttype: str = ""):
+    return getOrderForm(request=request, response=response, productType=producttype)
 
-# @app.post("/order", status_code=200)
-# def cart(response: Response, apiKey: str = "", orderForm: orderForm = {}):
-#     return getCart(response=response, apiKey=apiKey, orderForm=orderForm)
+@app.post("/order", status_code=200)
+def cart(request: Request, response: Response, orderForm: OrderForm = {}):
+    return pushOrder(request=request, response=response, orderForm=orderForm)
 
 # @app.get("/orderoverview", status_code=200)
 
