@@ -9,18 +9,28 @@
 
 ### Authentication
 
-#### [Login]
+### Login Endpoint
 
-- URL : https://api.sewez.shop/auth/login
-- Method : POST
-- Request Body : email, password
+**URL:** `https://api.sewez.shop/auth/login`
 
-[Logout]
-URL : https://api.sewez.shop/auth/logout
-Method : POST
-Body : token
+**Method:** `POST`
 
-#### Register Endpoint
+**Body:**
+
+- `email` (String) - Must be unique
+- `password` (String) - Minimum of 8 characters long
+
+### Login Endpoint
+
+**URL:** `https://api.sewez.shop/auth/logout`
+
+**Method:** `POST`
+
+**Body:**
+
+- `token` (String)
+
+### Register Endpoint
 
 **URL:** `https://api.sewez.shop/auth/register`
 
@@ -32,7 +42,7 @@ Body : token
 - `email` (String) - Must be unique
 - `password` (String) - Minimum of 8 characters long
 
-**Example of request JSON:**
+**Request Example:**
 
 ```json
 {
