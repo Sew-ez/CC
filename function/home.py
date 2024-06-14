@@ -30,8 +30,8 @@ def getHome(response: Response, request: Request):
         "error": False,
         "message": "Success",
         "session": {
-            "email": auth["email"],
             "name": auth["profileName"],
+            "email": auth["email"],
         },
         "product": product,
         "showcase": showcase
