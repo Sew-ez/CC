@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Dict
 
 class RegistrationForm(BaseModel):
-    profilename:str
+    name:str
     email:str
     password:str
 
