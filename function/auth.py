@@ -31,7 +31,6 @@ def authRegister(response: Response, registrationForm: RegistrationForm):
         }   
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE email = %s", (email,))
     user = DBtoDict(user_query, user_column)
-    print(user)
     if len(user) > 0:
         response.status_code=400
         return{
@@ -63,7 +62,6 @@ def authLogin(loginForm: LoginForm):
     loginFormData = loginForm.model_dump()
     email = str(loginFormData["email"])
     password = str(loginFormData["password"])
-    print(email)
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE email = %s", (email,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
@@ -109,6 +107,11 @@ def authLogout(logoutForm: LogoutForm):
         }
 
 def authCheck(sessionToken):
+    if sessionToken == "" or not "Bearer" in sessionToken:
+        return {
+            "login": False
+        }
+    sessionToken = str(sessionToken[len("Bearer "):])
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:

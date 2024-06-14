@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, Request, status
 from function.database import runDB, DBtoDict
 from function.auth import authCheck
 from function.classes import OrderForm
 
-def getCart(response: Response, sessionToken: str):
+def getCart(request: Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
@@ -13,7 +14,8 @@ def getCart(response: Response, sessionToken: str):
         }
     cart_query, cart_column = runDB("SELECT * FROM Home_Showcase")
 
-def getOrderForm(response: Response, sessionToken: str, productType: int):
+def getOrderForm(request: Request, response: Response, productType: int):
+    sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
@@ -81,7 +83,8 @@ def getOrderForm(response: Response, sessionToken: str, productType: int):
             "message": "No stock available"
         }
 
-def pushOrder(response: Response, sessionToken: str, orderForm: OrderForm):
+def pushOrder(request: Request, response: Response, orderForm: OrderForm):
+    sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED

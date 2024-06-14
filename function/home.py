@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, Request, status
 from function.database import runDB, DBtoDict
 from function.auth import authCheck
 
-def getHome(response: Response, sessionToken: str):
+def getHome(response: Response, request: Request):
+    sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
