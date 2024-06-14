@@ -3,8 +3,8 @@ from function.database import runDB, DBtoDict
 from function.auth import authCheck
 from function.classes import OrderForm
 
-def getCart(response: Response, apiKey: str):
-    auth = authCheck(apiKey)
+def getCart(response: Response, sessionToken: str):
+    auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
@@ -13,8 +13,8 @@ def getCart(response: Response, apiKey: str):
         }
     cart_query, cart_column = runDB("SELECT * FROM Home_Showcase")
 
-def getOrderForm(response: Response, apiKey: str, productType: int):
-    auth = authCheck(apiKey)
+def getOrderForm(response: Response, sessionToken: str, productType: int):
+    auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
@@ -61,19 +61,31 @@ def getOrderForm(response: Response, apiKey: str, productType: int):
                                         ) AS t4
                                               """, (productType,productType,productType,productType))
     stock = DBtoDict(stock_query, stock_column)
-    print(stock)
-    orderFormData = {}
-    for row in stock:
-        if row['attribute'] not in orderFormData:
-            orderFormData[row['attribute']] = []
-        orderFormData[row['attribute']].append({
-            row['id']:row['value']
-        })
-    return orderFormData
+    if len(stock)>0:
+        orderFormData = {}
+        for row in stock:
+            if row['attribute'] not in orderFormData:
+                orderFormData[row['attribute']] = []
+            orderFormData[row['attribute']].append({
+                row['id']:row['value']
+            })
+        orderFormData = {
+            "error": False,
+            "message": "Stock fetch successfully",
+            "list":orderFormData
+        }
+        return orderFormData
+    else:
+        return {
+            "error": True,
+            "message": "No stock available"
+        }
 
-
-def pushOrder(response: Response, orderForm: OrderForm):
-    return {
+def pushOrder(response: Response, sessionToken: str, orderForm: OrderForm):
+    auth = authCheck(sessionToken)
+    if not auth["login"]:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {
             "status": 401,
             "message": "Unauthorized"
         }
