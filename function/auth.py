@@ -1,4 +1,5 @@
-from function.classes import RegistrationForm
+from function.classes import RegistrationForm, LoginForm, LogoutForm
+from function.dataValidation import isValidEmail
 from fastapi import Response
 from .database import runDB, DBtoDict
 from uuid import uuid4
@@ -7,80 +8,106 @@ import bcrypt
 
 def authRegister(response: Response, registrationForm: RegistrationForm):
     registrationFormData = registrationForm.model_dump()
-    username = str(registrationFormData["username"])
+    email = str(registrationFormData["email"])
     profileName = str(registrationFormData["profilename"])
     password = str(registrationFormData["password"])
-    if(username == "" or profileName == "" or password == ""):
+    if(email == "" or profileName == "" or password == ""):
         response.status_code=400
         return{
-            "status": 400,
+            "error": True,
             "message": "Please fill all required field"
         } 
-    elif(" " in username):
+    elif(len(password)<8):
         response.status_code=400
         return{
-            "status": 400,
-            "message": "Username contains illegal character"
+            "error": True,
+            "message": "Password must be at least 8 characters"
+        }
+    elif(not isValidEmail(email)):
+        response.status_code=400
+        return{
+            "error": True,
+            "message": "Email contains illegal character"
         }   
-    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (username,))
+    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE email = %s", (email,))
     user = DBtoDict(user_query, user_column)
     print(user)
     if len(user) > 0:
         response.status_code=400
         return{
-            "status": 400,
+            "status": True,
             "message": "Username already exist"
         }
     else:
         salt = bcrypt.gensalt()
         password_b = password.encode('utf-8')
         hashed = bcrypt.hashpw(password_b, salt).decode('utf-8')
-        runDB("INSERT INTO Auth_User (username, name, password) VALUES (%s, %s, %s)", (username, profileName, hashed))
-        user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (username,))
+        runDB("INSERT INTO Auth_User (username, name, password) VALUES (%s, %s, %s)", (email, profileName, hashed))
+        user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (email,))
         user = DBtoDict(user_query, user_column)
         if len(user) > 0:
             encrypted_passwd = user[0]['password']
             if bcrypt.checkpw(password.encode('utf-8'), encrypted_passwd.encode('utf-8')):
                 return {
-                    "status": 200,
+                    "error": False,
                     "message": "Successfully registered"
                 }
         else:
+            response.status_code=500
             return {
-                "status": 500,
-                "message": "Server side error! Contact Developer"
+                "error": True,
+                "message": "Server side error. Contact Developer!"
             }
 
-def authLogin(username, password):
-    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (username,))
+def authLogin(loginForm: LoginForm):
+    loginFormData = loginForm.model_dump()
+    email = str(loginFormData["email"])
+    password = str(loginFormData["password"])
+    print(email)
+    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE email = %s", (email,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
         encrypted_passwd = user[0]['password']
         if bcrypt.checkpw(password.encode('utf-8'), encrypted_passwd.encode('utf-8')):
             rand_token = str(uuid4())
-            runDB("UPDATE Auth_User SET apiKey = %s WHERE username = %s", (rand_token, username))
+            runDB("UPDATE Auth_User SET apiKey = %s WHERE email = %s", (rand_token, email))
             return {
-                "login": True,
-                "apiKey": rand_token,
-                "username": user[0]['username'],
-                "profileName": user[0]['name']
+                "error": False,
+                "message": "Success",
+                "loginResult": {
+                    "userId": user[0]['id'],
+                    "name": user[0]['name'],
+                    "token": rand_token
+                }
             }
         else:
             return {
-                "login": False,
+                "error": True,
                 "message": "Wrong Password"
             }
     else:
         return {
-            "login": False,
+            "error": True,
             "message": "User Not Found"
         }
     
-def authLogout(apiKey):
-    runDB("UPDATE Auth_User SET apiKey = '' WHERE apiKey =  %s", (apiKey,))
-    return {
-        "logout": True
-    }
+def authLogout(logoutForm: LogoutForm):
+    loginFormData = logoutForm.model_dump()
+    username = str(loginFormData["email"])
+    password = str(loginFormData["password"])
+    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (username,))
+    user = DBtoDict(user_query, user_column)
+    if len(user) > 0:
+        runDB("UPDATE Auth_User SET apiKey = '' WHERE apiKey =  %s", (apiKey,))
+        return {
+            "error": False,
+            "message": "Successfully logged out"
+        }
+    else:
+        return {
+            "error": True,
+            "message": "Session not found"
+        }
 
 def authCheck(apiKey):
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE apiKey = %s", (apiKey,))

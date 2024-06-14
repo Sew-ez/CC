@@ -29,7 +29,7 @@ from fastapi.staticfiles import StaticFiles
 from function.home import getHome
 from function.order import getCart, getOrderForm
 from function.auth import authLogin, authLogout, authRegister
-from function.classes import RegistrationForm, OrderForm
+from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -40,13 +40,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #################################################################
 #                              AUTH                             #
 #################################################################
-@app.get("/auth/login", status_code=200)
-def login(response: Response, username: str = "", password: str = ""):
-    return authLogin(username=username, password=password)
+@app.post("/auth/login", status_code=200)
+def login(response: Response, loginForm: LoginForm):
+    return authLogin(loginForm=loginForm)
 
 @app.get("/auth/logout", status_code=200)
-def logout(response: Response, apikey: str = ""):
-    return authLogout(apiKey=apikey)
+def logout(response: Response, logoutForm:LogoutForm):
+    return authLogout(logoutForm=logoutForm)
 
 @app.post("/auth/register", status_code=200)
 def register(response: Response, registrationform: RegistrationForm):

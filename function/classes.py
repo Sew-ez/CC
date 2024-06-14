@@ -2,9 +2,16 @@ from pydantic import BaseModel
 from typing import Dict
 
 class RegistrationForm(BaseModel):
-    profilename: str
-    username:str
+    profilename:str
+    email:str
     password:str
+
+class LoginForm(BaseModel):
+    email:str
+    password:str
+
+class LogoutForm(BaseModel):
+    apikey:str
 
 class Ukuran(BaseModel):
     s: int
