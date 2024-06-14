@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response, Request, status
 from function.database import runDB, DBtoDict
 from function.auth import authCheck
+import os
 
 def getHome(response: Response, request: Request):
     sessionToken = request.headers.get("Authorization")
@@ -8,7 +9,7 @@ def getHome(response: Response, request: Request):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
     
@@ -20,11 +21,17 @@ def getHome(response: Response, request: Request):
     product_query, product_column = runDB("SELECT Stock_Type.id, Stock_Type.`type` FROM Stock LEFT JOIN Stock_Type ON Stock.`type` = Stock_Type.id WHERE Stock.quantity > 0 GROUP BY Stock_Type.id, Stock_Type.`type` ORDER BY Stock_Type.id")
     product = DBtoDict(product_query, product_column)
 
+    #Iterate and update image path for showcase
+    for item in showcase:
+        baseUrl = os.getenv("BASE_URL")
+        item["image"] = f"{baseUrl}/static/showcase/{item['image']}"
+
     return {
-        "status": 200,
+        "error": False,
+        "message": "Success",
         "session": {
-            "userName": auth["userName"],
-            "profileName": auth["profileName"],
+            "email": auth["email"],
+            "name": auth["profileName"],
         },
         "product": product,
         "showcase": showcase
