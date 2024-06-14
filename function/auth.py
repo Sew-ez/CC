@@ -70,7 +70,7 @@ def authLogin(loginForm: LoginForm):
         encrypted_passwd = user[0]['password']
         if bcrypt.checkpw(password.encode('utf-8'), encrypted_passwd.encode('utf-8')):
             rand_token = str(uuid4())
-            runDB("UPDATE Auth_User SET apiKey = %s WHERE email = %s", (rand_token, email))
+            runDB("UPDATE Auth_User SET sessionToken = %s WHERE email = %s", (rand_token, email))
             return {
                 "error": False,
                 "message": "Success",
@@ -92,13 +92,12 @@ def authLogin(loginForm: LoginForm):
         }
     
 def authLogout(logoutForm: LogoutForm):
-    loginFormData = logoutForm.model_dump()
-    username = str(loginFormData["email"])
-    password = str(loginFormData["password"])
-    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE username = %s", (username,))
+    logoutFormData = logoutForm.model_dump()
+    sessionToken = str(logoutFormData["sessionToken"])
+    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
-        runDB("UPDATE Auth_User SET apiKey = '' WHERE apiKey =  %s", (apiKey,))
+        runDB("UPDATE Auth_User SET sessionToken = '' WHERE sessionToken =  %s", (sessionToken,))
         return {
             "error": False,
             "message": "Successfully logged out"
@@ -109,8 +108,8 @@ def authLogout(logoutForm: LogoutForm):
             "message": "Session not found"
         }
 
-def authCheck(apiKey):
-    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE apiKey = %s", (apiKey,))
+def authCheck(sessionToken):
+    user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
         return {

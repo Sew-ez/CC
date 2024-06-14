@@ -56,20 +56,20 @@ def register(response: Response, registrationform: RegistrationForm):
 #                           HOME PAGE                           #
 #################################################################
 @app.get("/home", status_code=200)
-def home(response: Response, apikey: str):
-    return getHome(response, apikey)
+def home(response: Response, token: str):
+    return getHome(response, sessionToken=token)
 
 #################################################################
 #                            ORDERING                           #
 #################################################################
 
 @app.get("/cart", status_code=200)
-def cart(response: Response, apikey: str = ""):
-    return getCart(response=response, apiKey=apikey)
+def cart(response: Response, token: str = ""):
+    return getCart(response=response, sessionToken=token)
 
 @app.get("/order", status_code=200)
-def order(response: Response, apikey: str = "", producttype: str = ""):
-    return getOrderForm(response=response, apiKey=apikey, productType=producttype)
+def order(response: Response, token: str = "", producttype: str = ""):
+    return getOrderForm(response=response, sessionToken=token, productType=producttype)
 
 # @app.post("/order", status_code=200)
 # def cart(response: Response, apiKey: str = "", orderForm: orderForm = {}):
