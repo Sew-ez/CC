@@ -1,4 +1,4 @@
 fastapi
-mysql-connector
+mysql-connector-python
 bcrypt
 python-dotenv
