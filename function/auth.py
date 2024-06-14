@@ -95,7 +95,7 @@ def authLogout(logoutForm: LogoutForm):
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
-        runDB("UPDATE Auth_User SET sessionToken = '' WHERE sessionToken =  %s", (sessionToken,))
+        runDB("UPDATE Auth_User SET sessionToken = NULL WHERE sessionToken =  %s", (sessionToken,))
         return {
             "error": False,
             "message": "Successfully logged out"
