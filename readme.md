@@ -20,7 +20,7 @@ URL : https://api.sewez.shop/auth/logout
 Method : POST
 Body : token
 
-# Register Endpoint
+#### Register Endpoint
 
 **URL:** `https://api.sewez.shop/auth/register`
 
