@@ -20,6 +20,8 @@
 - `email` (String) - Must be unique
 - `password` (String) - Minimum of 8 characters long
 
+###
+
 ### Login Endpoint
 
 **URL:** `https://api.sewez.shop/auth/logout`
