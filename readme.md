@@ -9,10 +9,13 @@
 
 #### Authentication
 
-[Login]
-URL : https://api.sewez.shop/auth/login
-Method : POST
-Request Body : email, password
+##### [Login]
+
+##### URL : https://api.sewez.shop/auth/login
+
+##### Method : POST
+
+##### Request Body : email, password
 
 [Logout]
 URL : https://api.sewez.shop/auth/logout
