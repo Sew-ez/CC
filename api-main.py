@@ -23,8 +23,8 @@
 
 
 
-from typing import Union
-from fastapi import FastAPI, Response, status
+from typing import Union, Annotated
+from fastapi import FastAPI, Response, status, Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
 from function.order import getCart, getOrderForm
@@ -85,8 +85,8 @@ def order(response: Response, token: str = "", producttype: str = ""):
 
 
 @app.get("/test")
-def test(response: Response):
-    print (response.raw_headers)
+def test(response: Response, user_agent: Annotated[str | None, Header()] = None):
+    print (user_agent)
     return {
-        1:response.raw_headers
+        1:user_agent
     }
