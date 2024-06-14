@@ -24,7 +24,7 @@
 
 
 from typing import Union, Annotated
-from fastapi import FastAPI, Response, status, Header
+from fastapi import FastAPI, Response, Request, status, Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
 from function.order import getCart, getOrderForm
@@ -44,7 +44,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def login(response: Response, loginForm: LoginForm):
     return authLogin(loginForm=loginForm)
 
-@app.get("/auth/logout", status_code=200)
+@app.post("/auth/logout", status_code=200)
 def logout(response: Response, logoutForm:LogoutForm):
     return authLogout(logoutForm=logoutForm)
 
@@ -56,19 +56,19 @@ def register(response: Response, registrationform: RegistrationForm):
 #                           HOME PAGE                           #
 #################################################################
 @app.get("/home", status_code=200)
-def home(response: Response, token: str):
-    return getHome(response, sessionToken=token)
+def home(request: Request, response: Response):
+    return getHome(request=request, response=response)
 
 #################################################################
 #                            ORDERING                           #
 #################################################################
 
 @app.get("/cart", status_code=200)
-def cart(response: Response, token: str = ""):
+def cart(request: Request, response: Response, token: str = ""):
     return getCart(response=response, sessionToken=token)
 
 @app.get("/order", status_code=200)
-def order(response: Response, token: str = "", producttype: str = ""):
+def order(request: Request, response: Response, token: str = "", producttype: str = ""):
     return getOrderForm(response=response, sessionToken=token, productType=producttype)
 
 # @app.post("/order", status_code=200)
@@ -83,10 +83,9 @@ def order(response: Response, token: str = "", producttype: str = ""):
 #################################################################
 # @app.get("/payment", status_code=200)
 
-
+import json
 @app.get("/test")
-def test(response: Response, user_agent: Annotated[str | None, Header()] = None):
-    print (user_agent)
+def test(request: Request, response: Response, user_agent: Annotated[str | None, Header()] = None):
     return {
-        1:user_agent
+        1:request.headers
     }
