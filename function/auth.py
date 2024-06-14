@@ -107,7 +107,7 @@ def authLogout(logoutForm: LogoutForm):
         }
 
 def authCheck(sessionToken:str = ""):
-    if sessionToken == "" or not type(sessionToken)=="String":
+    if sessionToken == "" or not type(sessionToken)==str:
         return {
             "login": False
         }
