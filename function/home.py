@@ -14,7 +14,7 @@ def getHome(response: Response, request: Request):
         }
     
     # Get Showcase
-    showcase_query, showcase_column = runDB("SELECT * FROM Home_Showcase")
+    showcase_query, showcase_column = runDB("SELECT * FROM Home_Showcase ORDER BY id DESC")
     showcase = DBtoDict(showcase_query, showcase_column)
 
     # Get Product Categories
