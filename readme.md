@@ -7,9 +7,11 @@
 
 ## Documentation
 
-### Authentication
+### AUTHENTICATION
 
-### Login Endpoint
+<br>
+
+### [ Login Endpoint ]
 
 **URL:** `https://api.sewez.shop/auth/login`
 
@@ -20,9 +22,9 @@
 - `email` (String) - Must be unique
 - `password` (String) - Minimum of 8 characters long
 
-###
+<br>
 
-### Login Endpoint
+### [ Logout Endpoint ]
 
 **URL:** `https://api.sewez.shop/auth/logout`
 
@@ -32,7 +34,9 @@
 
 - `token` (String)
 
-### Register Endpoint
+<br>
+
+### [ Register Endpoint ]
 
 **URL:** `https://api.sewez.shop/auth/register`
 
