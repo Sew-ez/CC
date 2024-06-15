@@ -4,6 +4,7 @@ from fastapi import Response, Request, status
 from .database import runDB, DBtoDict
 from uuid import uuid4
 import bcrypt
+import os
 
 
 def authRegister(response: Response, registrationForm: RegistrationForm):
@@ -132,10 +133,16 @@ def authCheck(sessionToken:str = ""):
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
+        baseUrl = os.getenv("BASE_URL")
+        userUniqueId = user[0]['uniqueId']
+        profilePictureSource = user[0]['profilePicture']
+        if profilePictureSource == 1:
+            profilePicture = f"{baseUrl}/static/profile/{userUniqueId}.jpg"
         return {
             "login": True,
             "email": user[0]['email'],
             "profileName": user[0]['name'],
+            "profilePicture": profilePicture,
             "sessionToken": user[0]['sessionToken']
         }
     else:
