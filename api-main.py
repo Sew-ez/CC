@@ -52,7 +52,7 @@ def logout(request: Request, response: Response):
 def register(response: Response, registrationform: RegistrationForm):
     return authRegister(response=response, registrationForm=registrationform)
 
-@app.post("/auth/check", status_code=200)
+@app.get("/auth/check", status_code=200)
 def checkSession(request: Request, response: Response):
     sessionToken = request.headers.get("Authorization")
     return authCheck(sessionToken)
