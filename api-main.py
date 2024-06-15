@@ -44,7 +44,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def login(response: Response, loginForm: LoginForm):
     return authLogin(loginForm=loginForm)
 
-@app.post("/auth/logout", status_code=200)
+@app.get("/auth/logout", status_code=200)
 def logout(request: Request, response: Response):
     return authLogout(request=request, response=response)
 
