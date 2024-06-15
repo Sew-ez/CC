@@ -138,6 +138,8 @@ def authCheck(sessionToken:str = ""):
         profilePictureSource = user[0]['profilePicture']
         if profilePictureSource == 1:
             profilePicture = f"{baseUrl}/static/profile/{userUniqueId}.jpg"
+        else:
+            profilePicture = f"{baseUrl}/static/aseets/placeholder/placeholder_male.jpg"
         return {
             "login": True,
             "email": user[0]['email'],
