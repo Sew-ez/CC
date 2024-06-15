@@ -32,6 +32,7 @@ def getHome(response: Response, request: Request):
         "session": {
             "name": auth["profileName"],
             "email": auth["email"],
+            "profilePicture": auth["profilePicture"]
         },
         "product": product,
         "showcase": showcase
