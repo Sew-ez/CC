@@ -27,7 +27,7 @@ from typing import Union, Annotated
 from fastapi import FastAPI, Response, Request, status, Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.order import getCart, getOrderForm, pushOrder
+from function.order import getCart, getOrderForm, pushCart, pushOrder
 from function.auth import authLogin, authLogout, authRegister
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm
 from dotenv import load_dotenv
@@ -66,6 +66,10 @@ def home(request: Request, response: Response):
 @app.get("/cart", status_code=200)
 def cart(request: Request, response: Response):
     return getCart(response=response, request=request)
+
+@app.post("/cart", status_code=200)
+def cart(request: Request, response: Response, orderForm: OrderForm = {}):
+    return pushCart(request=request, response=response, orderForm=orderForm)
 
 @app.get("/order", status_code=200)
 def order(request: Request, response: Response, producttype: str = ""):

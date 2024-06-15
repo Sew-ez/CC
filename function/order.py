@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response, Request, status
 from function.database import runDB, DBtoDict
 from function.auth import authCheck
-from function.classes import OrderForm
+from function.classes import OrderForm, CartForm
 import json
 
 def getCart(request: Request, response: Response):
@@ -130,7 +130,7 @@ def getOrderForm(request: Request, response: Response, productType: int):
             "message": "No stock available"
         }
 
-def pushOrder(request: Request, response: Response, orderForm: OrderForm):
+def pushCart(request: Request, response: Response, cartForm: CartForm):
     sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
     if not auth["login"]:
@@ -139,8 +139,20 @@ def pushOrder(request: Request, response: Response, orderForm: OrderForm):
             "status": 401,
             "message": "Unauthorized"
         }
-    
+    sessionToken = auth["sessionToken"]
+    stock = cartForm[""]
+    ##############################################################################
+    #                           SOON TO BE ML FUNCTION                           #
+    ##############################################################################
+    order_query, order_column = runDB("""
+                                        INSERT INTO order_cart (user, stock, quantity, price)
+                                        VALUES (
+                                            (SELECT id FROM auth_user WHERE sessionToken = %s),
+                                            (SELECT id FROM stock WHERE `type` = %s AND color = %s AND size = %s AND fabric = %s),
+                                            %s,
+                                            %s
+                                        )
+                                    """, (auth["sessionToken"], orderForm.product_type, orderForm.product_color, orderForm.product_size, orderForm.product_fabric, orderForm.quantity, json.dumps(orderForm.price)))
 
-
-def pushCart():
+def pushOrder(request: Request, response: Response, orderForm: OrderForm):
     pass

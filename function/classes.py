@@ -17,8 +17,13 @@ class Ukuran(BaseModel):
     s: int
     m: int
 
+class CartForm(BaseModel):
+    token: str
+    product_type: int
+    product_fabric: int
+    product_color: int
+    product_size: Dict[str, int]
+
 class OrderForm(BaseModel):
-    apikey: str
-    jenisbahan: int
-    warna: int
-    ukuran: Dict[str, int]
+    token: str
+    cart: int
