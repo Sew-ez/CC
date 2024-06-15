@@ -28,7 +28,7 @@ from fastapi import FastAPI, Response, Request, status, Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
 from function.order import getCart, getOrderForm, pushCart, pushOrder
-from function.auth import authLogin, authLogout, authRegister
+from function.auth import authLogin, authLogout, authRegister, authCheck
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm
 from dotenv import load_dotenv
 import os
@@ -51,6 +51,11 @@ def logout(request: Request, response: Response):
 @app.post("/auth/register", status_code=200)
 def register(response: Response, registrationform: RegistrationForm):
     return authRegister(response=response, registrationForm=registrationform)
+
+@app.post("/auth/check", status_code=200)
+def checkSession(request: Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
+    return authCheck(sessionToken)
 
 #################################################################
 #                           HOME PAGE                           #
