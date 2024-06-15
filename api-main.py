@@ -45,8 +45,8 @@ def login(response: Response, loginForm: LoginForm):
     return authLogin(loginForm=loginForm)
 
 @app.post("/auth/logout", status_code=200)
-def logout(response: Response, logoutForm:LogoutForm):
-    return authLogout(logoutForm=logoutForm)
+def logout(request: Request, response: Response):
+    return authLogout(request=request, response=response)
 
 @app.post("/auth/register", status_code=200)
 def register(response: Response, registrationform: RegistrationForm):

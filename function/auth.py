@@ -1,6 +1,6 @@
 from function.classes import RegistrationForm, LoginForm, LogoutForm
 from function.dataValidation import isValidEmail
-from fastapi import Response
+from fastapi import Response, Request, status
 from .database import runDB, DBtoDict
 from uuid import uuid4
 import bcrypt
@@ -9,7 +9,7 @@ import bcrypt
 def authRegister(response: Response, registrationForm: RegistrationForm):
     registrationFormData = registrationForm.model_dump()
     email = str(registrationFormData["email"])
-    profileName = str(registrationFormData["profilename"])
+    profileName = str(registrationFormData["name"])
     password = str(registrationFormData["password"])
     if(email == "" or profileName == "" or password == ""):
         response.status_code=400
@@ -89,9 +89,22 @@ def authLogin(loginForm: LoginForm):
             "message": "User Not Found"
         }
     
-def authLogout(logoutForm: LogoutForm):
-    logoutFormData = logoutForm.model_dump()
-    sessionToken = str(logoutFormData["token"])
+def authLogout(request:Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
+    auth = authCheck(sessionToken)
+    if not auth["login"]:
+        return {
+            "login": False
+        }
+    if sessionToken == "" or not type(sessionToken)==str:
+        return {
+            "login": False
+        }
+    elif not "Bearer" in sessionToken:
+        return {
+            "login": False
+        }
+    sessionToken = str(sessionToken[len("Bearer "):])
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
     if len(user) > 0:
