@@ -18,7 +18,7 @@ def getHome(response: Response, request: Request):
     showcase = DBtoDict(showcase_query, showcase_column)
 
     # Get Product Categories
-    product_query, product_column = runDB("SELECT Stock_Type.id, Stock_Type.`type` FROM Stock LEFT JOIN Stock_Type ON Stock.`type` = Stock_Type.id WHERE Stock.quantity > 0 GROUP BY Stock_Type.id, Stock_Type.`type` ORDER BY Stock_Type.id")
+    product_query, product_column = runDB("SELECT Stock_Type.id, Stock_Type.`type`, Stock_Type.image FROM Stock LEFT JOIN Stock_Type ON Stock.`type` = Stock_Type.id WHERE Stock.quantity > 0 GROUP BY Stock_Type.id, Stock_Type.`type` ORDER BY Stock_Type.id")
     product = DBtoDict(product_query, product_column)
 
     #Iterate and update image path for showcase
