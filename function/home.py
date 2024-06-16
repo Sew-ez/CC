@@ -25,6 +25,11 @@ def getHome(response: Response, request: Request):
     for item in showcase:
         baseUrl = os.getenv("BASE_URL")
         item["image"] = f"{baseUrl}/static/showcase/{item['image']}"
+    
+    #Iterate and update image path for category
+    for item in product:
+        baseUrl = os.getenv("BASE_URL")
+        product["image"] = f"{baseUrl}/static/category/{product['image']}"
 
     return {
         "error": False,
