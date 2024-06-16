@@ -29,7 +29,7 @@ def getHome(response: Response, request: Request):
     #Iterate and update image path for category
     for item in product:
         baseUrl = os.getenv("BASE_URL")
-        if not item["image"] == "":
+        if not item["image"] == None:
             item["image"] = f"{baseUrl}/static/category/{item['image']}"
 
     return {
