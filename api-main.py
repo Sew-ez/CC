@@ -24,10 +24,10 @@
 
 
 from typing import Union, Annotated
-from fastapi import FastAPI, Response, Request, status, UploadFile, File, Header
+from fastapi import FastAPI, Response, Request, status, UploadFile, File, Header, Form
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.order import getCart, getOrderForm, pushCart, pushOrder, getFabricTypeAll, getColorAll
+from function.order import getCart, getOrderForm, pushCart, pushOrder, getFabricTypeAll, getColorAll, addOrder
 from function.auth import authLogin, authLogout, authRegister, authCheck
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm, CartForm
 from dotenv import load_dotenv
@@ -77,7 +77,7 @@ def order(request: Request, response: Response):
     return getColorAll(request=request, response=response)
 
 @app.post("/order/submit", status_code=200)
-def submitOrder(request: Request, response: Response, jenisbahan:int, warna:int, xl:int, l:int, m:int, s:int, image: UploadFile = File(...)):
+def submitOrder(request: Request, response: Response, jenisbahan: Annotated[int, Form()], warna: Annotated[int, Form()], xl: Annotated[int, Form()], l: Annotated[int, Form()], m: Annotated[int, Form()], s: Annotated[int, Form()], image: UploadFile = File(...)):
     return addOrder(request=request, response=response, jenisbahan=jenisbahan, warna=warna, xl=xl, l=l, m=m, s=s, image=image)
 
 # @app.get("/cart", status_code=200)

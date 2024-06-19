@@ -229,19 +229,32 @@ def addOrder(request: Request, response: Response, jenisbahan:int, warna:int, xl
             "status": 401,
             "message": "Unauthorized"
         }
-    order_query, order_column = runDB("""
-                                        INSERT INTO order_cart (user, stock, quantity, price)
-                                        VALUES (
-                                            (SELECT id FROM auth_user WHERE sessionToken = %s),
-                                            (SELECT id FROM stock WHERE `type` = %s AND color = %s AND size = %s AND fabric = %s),
-                                            %s,
-                                            %s
-                                        )
-                                    """, (auth["sessionToken"], jenisbahan, warna, xl, l, m, s, image))
     return {
         "error": False,
-        "message": "Order added successfully"
+        "message": "Order added successfully",
+        "data": {
+            "jenisbahan": jenisbahan,
+            "warna": warna,
+            "xl": xl,
+            "l": l,
+            "m": m,
+            "s": s,
+            "image": image
+        }
     }
+    # order_query, order_column = runDB("""
+    #                                     INSERT INTO order_cart (user, stock, quantity, price)
+    #                                     VALUES (
+    #                                         (SELECT id FROM auth_user WHERE sessionToken = %s),
+    #                                         (SELECT id FROM stock WHERE `type` = %s AND color = %s AND size = %s AND fabric = %s),
+    #                                         %s,
+    #                                         %s
+    #                                     )
+    #                                 """, (auth["sessionToken"], jenisbahan, warna, xl, l, m, s, image))
+    # return {
+    #     "error": False,
+    #     "message": "Order added successfully"
+    # }
 
 # {
 #     "jenisbahan": 1,
