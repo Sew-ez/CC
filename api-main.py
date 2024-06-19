@@ -24,10 +24,10 @@
 
 
 from typing import Union, Annotated
-from fastapi import FastAPI, Response, Request, status, UploadFile,Header
+from fastapi import FastAPI, Response, Request, status, UploadFile, File, Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.order import getCart, getOrderForm, pushCart, pushOrder, getJenisBahanAll
+from function.order import getCart, getOrderForm, pushCart, pushOrder, getFabricTypeAll, getColorAll
 from function.auth import authLogin, authLogout, authRegister, authCheck
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm, CartForm
 from dotenv import load_dotenv
@@ -69,24 +69,32 @@ async def home(request: Request, response: Response):
 #################################################################
 
 @app.get("/order/jenis-bahan", status_code=200)
-async def order(request: Request, response: Response):
-    return await getJenisBahanAll(request=request, response=response)
+def order(request: Request, response: Response):
+    return getFabricTypeAll(request=request, response=response)
 
-@app.get("/cart", status_code=200)
-async def cart(request: Request, response: Response):
-    return await getCart(response=response, request=request)
+@app.get("/order/warna", status_code=200)
+def order(request: Request, response: Response):
+    return getColorAll(request=request, response=response)
 
-@app.post("/cart", status_code=200)
-async def cart(request: Request, response: Response, orderForm: OrderForm = {}):
-    return await pushCart(request=request, response=response, orderForm=orderForm)
+@app.post("/order/submit", status_code=200)
+def submitOrder(request: Request, response: Response, jenisbahan:int, warna:int, xl:int, l:int, m:int, s:int, image: UploadFile = File(...)):
+    return addOrder(request=request, response=response, jenisbahan=jenisbahan, warna=warna, xl=xl, l=l, m=m, s=s, image=image)
 
-@app.get("/order", status_code=200)
-async def order(request: Request, response: Response, producttype: str = ""):
-    return await getOrderForm(request=request, response=response, productType=producttype)
+# @app.get("/cart", status_code=200)
+# async def cart(request: Request, response: Response):
+#     return await getCart(response=response, request=request)
 
-@app.post("/order", status_code=200)
-async def cart(request: Request, response: Response, cartForm: CartForm = {}):
-    return await pushOrder(request=request, response=response, cartForm=CartForm)
+# @app.post("/cart", status_code=200)
+# async def cart(request: Request, response: Response, orderForm: OrderForm = {}):
+#     return await pushCart(request=request, response=response, orderForm=orderForm)
+
+# @app.get("/order", status_code=200)
+# async def order(request: Request, response: Response, producttype: str = ""):
+#     return await getOrderForm(request=request, response=response, productType=producttype)
+
+# @app.post("/order", status_code=200)
+# async def cart(request: Request, response: Response, cartForm: CartForm = {}):
+#     return await pushOrder(request=request, response=response, cartForm=CartForm)
 # @app.get("/orderoverview", status_code=200)
 
 

@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Response, Request, status
+from fastapi import FastAPI, Response, Request, status, UploadFile, File
 from function.database import runDB, DBtoDict
 from function.auth import authCheck
 from function.classes import OrderForm, CartForm
-import json
+import json, os
 
 def getCart(request: Request, response: Response):
     sessionToken = request.headers.get("Authorization")
@@ -167,20 +167,19 @@ def getFabricTypeAll(request: Request, response: Response):
             "status": 401,
             "message": "Unauthorized"
         }
-    fabric_type_query, fabric_type_column = runDB("SELECT * FROM stock_type")
+    fabric_type_query, fabric_type_column = runDB("SELECT * FROM stock_fabric")
     jenisData = DBtoDict(fabric_type_query, fabric_type_column)
     if len(jenisData)>0:
         listJenis = []
         for row in jenisData:
             listJenis.append({
                 "id": row['id'],
-                "type": row['type'],
-                "image": row["image"]
+                "type": row['fabric']
                 })
         jenis = {
             "error": False,
             "message": "Fabric type fetch successfully",
-            "jenis":jenis
+            "data":listJenis
         }
         return jenis
     else:
@@ -188,3 +187,68 @@ def getFabricTypeAll(request: Request, response: Response):
             "error": True,
             "message": "No jenis available"
         }
+    
+def getColorAll(request: Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
+    auth = authCheck(sessionToken)
+    print(auth)
+    if not auth["login"]:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {
+            "status": 401,
+            "message": "Unauthorized"
+        }
+    color_query, color_column = runDB("SELECT * FROM stock_color")
+    colorData = DBtoDict(color_query, color_column)
+    if len(colorData)>0:
+        listColor = []
+        for row in colorData:
+            listColor.append({
+                "id": row['id'],
+                "color": row['color'],
+                "hex": row["hexadecimal"]
+                })
+        color = {
+            "error": False,
+            "message": "Color fetch successfully",
+            "data":listColor
+        }
+        return color
+    else:
+        return {
+            "error": True,
+            "message": "No color available"
+        }
+    
+def addOrder(request: Request, response: Response, jenisbahan:int, warna:int, xl:int, l:int, m:int, s:int, image: UploadFile = File(...)):
+    sessionToken = request.headers.get("Authorization")
+    auth = authCheck(sessionToken)
+    if not auth["login"]:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {
+            "status": 401,
+            "message": "Unauthorized"
+        }
+    order_query, order_column = runDB("""
+                                        INSERT INTO order_cart (user, stock, quantity, price)
+                                        VALUES (
+                                            (SELECT id FROM auth_user WHERE sessionToken = %s),
+                                            (SELECT id FROM stock WHERE `type` = %s AND color = %s AND size = %s AND fabric = %s),
+                                            %s,
+                                            %s
+                                        )
+                                    """, (auth["sessionToken"], jenisbahan, warna, xl, l, m, s, image))
+    return {
+        "error": False,
+        "message": "Order added successfully"
+    }
+
+# {
+#     "jenisbahan": 1,
+#     "warna": 1,
+#     "xl": 0,
+#     "l": 0,
+#     "m": 0,
+#     "s": 10,
+#     "image": FILE
+# }
