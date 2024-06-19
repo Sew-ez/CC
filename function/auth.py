@@ -3,8 +3,7 @@ from function.dataValidation import isValidEmail
 from fastapi import Response, Request, status
 from .database import runDB, DBtoDict
 from uuid import uuid4
-import bcrypt
-import os
+import os, bcrypt, string, random
 
 
 def authRegister(response: Response, registrationForm: RegistrationForm):
@@ -151,3 +150,8 @@ def authCheck(sessionToken:str = ""):
         return {
             "login": False
         }
+    
+def randomGenerator(length):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choices(characters, k=length))
+    return random_string

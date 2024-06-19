@@ -1,34 +1,9 @@
-#############################################################################
-#
-#   [AUTH]
-#   GET /auth/login?username={your_username}&password={your_password}
-#   GET /auth/logout?apikey={your_api_key}
-#   POST /auth/register
-#       [Body]
-#       {
-#         "profilename"="{your_name}",
-#         "username"="{your_username}"",
-#         "password"="{your_password}",
-#       }
-# 
-#   [HOME]
-#   GET /home?apikey={your_api_key}
-#
-#   [ORDER]
-#   
-#
-#
-
-
-
-
-
 from typing import Union, Annotated
 from fastapi import FastAPI, Response, Request, status, UploadFile, File, Header, Form
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
 from function.order import getCart, getOrderForm, pushCart, pushOrder, getFabricTypeAll, getColorAll, addOrder
-from function.auth import authLogin, authLogout, authRegister, authCheck
+from function.auth import authLogin, authLogout, authRegister, authCheck, randomGenerator
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm, CartForm
 from dotenv import load_dotenv
 import os
@@ -108,6 +83,12 @@ import json
 async def test(request: Request, response: Response, user_agent: Annotated[str | None, Header()] = None):
     return await {
         1:request.headers
+    }
+
+@app.get("/test/random")
+async def test(request: Request, response: Response):
+    return {
+        "data": randomGenerator(5)
     }
 
 @app.post("/test/upload")
