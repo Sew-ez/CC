@@ -2,7 +2,6 @@ from function.classes import RegistrationForm, LoginForm, LogoutForm
 from function.dataValidation import isValidEmail
 from fastapi import Response, Request, status
 from .database import runDB, DBtoDict
-from uuid import uuid4
 import os, bcrypt, string, random
 
 
@@ -41,7 +40,8 @@ def authRegister(response: Response, registrationForm: RegistrationForm):
         salt = bcrypt.gensalt()
         password_b = password.encode('utf-8')
         hashed = bcrypt.hashpw(password_b, salt).decode('utf-8')
-        runDB("INSERT INTO Auth_User (email, name, password) VALUES (%s, %s, %s)", (email, profileName, hashed))
+        uniQueId = randomGenerator(20)
+        runDB("INSERT INTO Auth_User (email, name, password, uniqueId) VALUES (%s, %s, %s, %s)", (email, profileName, hashed, uniQueId))
         user_query, user_column = runDB("SELECT * FROM Auth_User WHERE email = %s", (email,))
         user = DBtoDict(user_query, user_column)
         if len(user) > 0:
@@ -67,15 +67,24 @@ def authLogin(loginForm: LoginForm):
     if len(user) > 0:
         encrypted_passwd = user[0]['password']
         if bcrypt.checkpw(password.encode('utf-8'), encrypted_passwd.encode('utf-8')):
-            rand_token = str(uuid4())
+            rand_token = randomGenerator(100)
             runDB("UPDATE Auth_User SET sessionToken = %s WHERE email = %s", (rand_token, email))
+            baseUrl = os.getenv("BASE_URL")
+            userUniqueId = user[0]['uniqueId']
+            profilePictureSource = user[0]['profilePicture']
+            if profilePictureSource == 1:
+                profilePicture = f"{baseUrl}/static/profile/{userUniqueId}.jpg"
+            else:
+                profilePicture = f"{baseUrl}/static/aseets/placeholder/placeholder_male.jpg"
             return {
                 "error": False,
                 "message": "Success",
                 "loginResult": {
-                    "userId": user[0]['id'],
+                    "userId": user[0]['uniqueId'],
                     "name": user[0]['name'],
-                    "token": rand_token
+                    "email": user[0]['email'],
+                    "token": rand_token,
+                    "picture": profilePicture
                 }
             }
         else:
@@ -131,6 +140,7 @@ def authCheck(sessionToken:str = ""):
     sessionToken = str(sessionToken[len("Bearer "):])
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
+    print(user)
     if len(user) > 0:
         baseUrl = os.getenv("BASE_URL")
         userUniqueId = user[0]['uniqueId']
@@ -140,17 +150,26 @@ def authCheck(sessionToken:str = ""):
         else:
             profilePicture = f"{baseUrl}/static/aseets/placeholder/placeholder_male.jpg"
         return {
-            "login": True,
-            "email": user[0]['email'],
-            "profileName": user[0]['name'],
-            "profilePicture": profilePicture,
-            "sessionToken": user[0]['sessionToken']
+                "error": False,
+                "message": "Success",
+                "login": True,
+                "loginResult": {
+                    "userId": user[0]['uniqueId'],
+                    "name": user[0]['name'],
+                    "email": user[0]['email'],
+                    "token": user[0]['sessionToken'],
+                    "picture": profilePicture
+                },
+                "email": user[0]['email'],
+                "profileName": user[0]['name'],
+                "profilePicture": profilePicture,
+                "sessionToken": user[0]['sessionToken']
         }
     else:
         return {
             "login": False
         }
-    
+        
 def randomGenerator(length):
     characters = string.ascii_letters + string.digits
     random_string = ''.join(random.choices(characters, k=length))
