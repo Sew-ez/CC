@@ -16,21 +16,21 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #                              AUTH                             #
 #################################################################
 @app.post("/auth/login", status_code=200)
-async def login(response: Response, loginForm: LoginForm):
-    return await authLogin(loginForm=loginForm)
+def login(response: Response, loginForm: LoginForm):
+    return authLogin(loginForm=loginForm)
 
 @app.get("/auth/logout", status_code=200)
-async def logout(request: Request, response: Response):
-    return await authLogout(request=request, response=response)
+def logout(request: Request, response: Response):
+    return authLogout(request=request, response=response)
 
 @app.post("/auth/register", status_code=200)
-async def register(response: Response, registrationform: RegistrationForm):
-    return await authRegister(response=response, registrationForm=registrationform)
+def register(response: Response, registrationform: RegistrationForm):
+    return authRegister(response=response, registrationForm=registrationform)
 
 @app.get("/auth/check", status_code=200)
-async def checkSession(request: Request, response: Response):
+def checkSession(request: Request, response: Response):
     sessionToken = request.headers.get("Authorization")
-    return await authCheck(sessionToken)
+    return authCheck(sessionToken)
 
 #################################################################
 #                           HOME PAGE                           #
