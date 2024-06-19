@@ -24,12 +24,12 @@
 
 
 from typing import Union, Annotated
-from fastapi import FastAPI, Response, Request, status, Header
+from fastapi import FastAPI, Response, Request, status, UploadFile,Header
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.order import getCart, getOrderForm, pushCart, pushOrder
+from function.order import getCart, getOrderForm, pushCart, pushOrder, getJenisBahanAll
 from function.auth import authLogin, authLogout, authRegister, authCheck
-from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm
+from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm, CartForm
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -41,49 +41,52 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #                              AUTH                             #
 #################################################################
 @app.post("/auth/login", status_code=200)
-def login(response: Response, loginForm: LoginForm):
-    return authLogin(loginForm=loginForm)
+async def login(response: Response, loginForm: LoginForm):
+    return await authLogin(loginForm=loginForm)
 
 @app.get("/auth/logout", status_code=200)
-def logout(request: Request, response: Response):
-    return authLogout(request=request, response=response)
+async def logout(request: Request, response: Response):
+    return await authLogout(request=request, response=response)
 
 @app.post("/auth/register", status_code=200)
-def register(response: Response, registrationform: RegistrationForm):
-    return authRegister(response=response, registrationForm=registrationform)
+async def register(response: Response, registrationform: RegistrationForm):
+    return await authRegister(response=response, registrationForm=registrationform)
 
 @app.get("/auth/check", status_code=200)
-def checkSession(request: Request, response: Response):
+async def checkSession(request: Request, response: Response):
     sessionToken = request.headers.get("Authorization")
-    return authCheck(sessionToken)
+    return await authCheck(sessionToken)
 
 #################################################################
 #                           HOME PAGE                           #
 #################################################################
 @app.get("/home", status_code=200)
-def home(request: Request, response: Response):
-    return getHome(request=request, response=response)
+async def home(request: Request, response: Response):
+    return await getHome(request=request, response=response)
 
 #################################################################
 #                            ORDERING                           #
 #################################################################
 
+@app.get("/order/jenis-bahan", status_code=200)
+async def order(request: Request, response: Response):
+    return await getJenisBahanAll(request=request, response=response)
+
 @app.get("/cart", status_code=200)
-def cart(request: Request, response: Response):
-    return getCart(response=response, request=request)
+async def cart(request: Request, response: Response):
+    return await getCart(response=response, request=request)
 
 @app.post("/cart", status_code=200)
-def cart(request: Request, response: Response, orderForm: OrderForm = {}):
-    return pushCart(request=request, response=response, orderForm=orderForm)
+async def cart(request: Request, response: Response, orderForm: OrderForm = {}):
+    return await pushCart(request=request, response=response, orderForm=orderForm)
 
 @app.get("/order", status_code=200)
-def order(request: Request, response: Response, producttype: str = ""):
-    return getOrderForm(request=request, response=response, productType=producttype)
+async def order(request: Request, response: Response, producttype: str = ""):
+    return await getOrderForm(request=request, response=response, productType=producttype)
 
 @app.post("/order", status_code=200)
-def cart(request: Request, response: Response, orderForm: OrderForm = {}):
-    return pushOrder(request=request, response=response, orderForm=orderForm)
-
+async def cart(request: Request, response: Response, cartForm: CartForm = {}):
+    return await pushOrder(request=request, response=response, cartForm=CartForm)
 # @app.get("/orderoverview", status_code=200)
 
 
@@ -94,7 +97,30 @@ def cart(request: Request, response: Response, orderForm: OrderForm = {}):
 
 import json
 @app.get("/test")
-def test(request: Request, response: Response, user_agent: Annotated[str | None, Header()] = None):
-    return {
+async def test(request: Request, response: Response, user_agent: Annotated[str | None, Header()] = None):
+    return await {
         1:request.headers
     }
+
+@app.post("/test/upload")
+async def testUpload(request: Request, response: Response, file:UploadFile):
+    file_path = os.getcwd()
+    file_path = os.path.join(file_path, "test.txt")
+    try:
+        # Read the file and write it to the specified path
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+
+        return {
+            "filename": file.filename,
+            "content_type": file.content_type,
+            "file_path": file_path
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
+    # return{
+    #     "dataRead": await file.read(),
+    #     "data": file
+    # }

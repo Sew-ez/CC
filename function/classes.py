@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Dict
+from fastapi import UploadFile
 
 class RegistrationForm(BaseModel):
     name:str
@@ -23,6 +24,7 @@ class CartForm(BaseModel):
     product_fabric: int
     product_color: int
     product_size: Dict[str, int]
+    photo: UploadFile
 
 class OrderForm(BaseModel):
     token: str

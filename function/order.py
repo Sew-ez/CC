@@ -156,3 +156,35 @@ def pushCart(request: Request, response: Response, cartForm: CartForm):
 
 def pushOrder(request: Request, response: Response, orderForm: OrderForm):
     pass
+
+def getFabricTypeAll(request: Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
+    auth = authCheck(sessionToken)
+    print(auth)
+    if not auth["login"]:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {
+            "status": 401,
+            "message": "Unauthorized"
+        }
+    fabric_type_query, fabric_type_column = runDB("SELECT * FROM stock_type")
+    jenisData = DBtoDict(fabric_type_query, fabric_type_column)
+    if len(jenisData)>0:
+        listJenis = []
+        for row in jenisData:
+            listJenis.append({
+                "id": row['id'],
+                "type": row['type'],
+                "image": row["image"]
+                })
+        jenis = {
+            "error": False,
+            "message": "Fabric type fetch successfully",
+            "jenis":jenis
+        }
+        return jenis
+    else:
+        return {
+            "error": True,
+            "message": "No jenis available"
+        }
