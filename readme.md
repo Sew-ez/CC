@@ -204,3 +204,45 @@
 ```
 
 <br>
+
+### [ Push Order ]
+
+**URL:** `https://api.sewez.shop/order/submit`
+
+**Method:** `POST`
+
+**Header:**
+
+- `Authorization` (String) - Bearer
+
+**Body (form-data):**
+
+- `jenisproduk` (int) - id of product (1: tshirt, 2: jacket, 3:Tote - Bag)
+- `jenisbahan` (int) - id from jenis-bahan api
+- `warna` (int) - id from warna api
+- `jenislogo` (int) - id of jenis-bahan-logo api
+- `s` (int) - number of S-size order
+- `m` (int) - number of S-size order
+- `l` (int) - number of S-size order
+- `xl` (int) - number of S-size order
+- `xxl` (int) - number of S-size order
+- `image` (file) - mockup image, must be type image/jpeg
+
+**Response Example:**
+
+```json
+{
+    "error": false,
+    "message": "Order added successfully",
+    "data": {
+        "jenisbahan": "Combed 30s",
+        "warna": "Hitam",
+        "jenislogo": "DTF",
+        "xl": 100,
+        "l": 120,
+        "m": 30,
+        "s": 57,
+        "image": "https://{host}/{PATH}/image.jpg"
+    }
+}
+```
