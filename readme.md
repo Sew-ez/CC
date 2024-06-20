@@ -102,3 +102,70 @@
   "message": "Successfully registered"
 }
 ```
+<br>
+
+### ORDER
+
+### [ List Jenis Bahan ]
+
+**URL:** `https://api.sewez.shop/order/jenis-bahan`
+
+**Method:** `GET`
+
+**Header:**
+
+- `Authentication` (String) - Bearer
+
+**Response Example:**
+
+```json
+{
+    "error": false,
+    "message": "Fabric type fetch successfully",
+    "data": [
+        {
+            "id": 1,
+            "type": "Combed 30s"
+        },
+        {
+            "id": 2,
+            "type": "Combed 24s"
+        }
+    ]
+}
+```
+
+<br>
+
+### [ List Color ]
+
+**URL:** `https://api.sewez.shop/order/warna`
+
+**Method:** `GET`
+
+**Header:**
+
+- `Authentication` (String) - Bearer
+
+**Response Example:**
+
+```json
+{
+    "error": false,
+    "message": "Color fetch successfully",
+    "data": [
+        {
+            "id": 1,
+            "color": "Hitam",
+            "hex": "FFFFFF"
+        },
+        {
+            "id": 2,
+            "color": "Putih",
+            "hex": "000000"
+        }
+    ]
+}
+```
+
+<br>
