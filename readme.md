@@ -114,7 +114,7 @@
 
 **Header:**
 
-- `Authentication` (String) - Bearer
+- `Authorization` (String) - Bearer
 
 **Response Example:**
 
@@ -145,7 +145,7 @@
 
 **Header:**
 
-- `Authentication` (String) - Bearer
+- `Authorization` (String) - Bearer
 
 **Response Example:**
 
