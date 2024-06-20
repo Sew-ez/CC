@@ -2,7 +2,7 @@ from typing import Union, Annotated
 from fastapi import FastAPI, Response, Request, status, UploadFile, File, Header, Form
 from fastapi.staticfiles import StaticFiles
 from function.home import getHome
-from function.order import getCart, getOrderForm, pushCart, pushOrder, getFabricTypeAll, getColorAll, addOrder
+from function.order import getCart, getOrderForm, pushCart, pushOrder, getFabricTypeAll, getColorAll, addOrder, getLogoTypeAll
 from function.auth import authLogin, authLogout, authRegister, authCheck, randomGenerator
 from function.classes import RegistrationForm, OrderForm, LoginForm, LogoutForm, CartForm
 from dotenv import load_dotenv
@@ -36,8 +36,8 @@ def checkSession(request: Request, response: Response):
 #                           HOME PAGE                           #
 #################################################################
 @app.get("/home", status_code=200)
-async def home(request: Request, response: Response):
-    return await getHome(request=request, response=response)
+def home(request: Request, response: Response):
+    return getHome(request=request, response=response)
 
 #################################################################
 #                            ORDERING                           #
@@ -47,13 +47,17 @@ async def home(request: Request, response: Response):
 def order(request: Request, response: Response):
     return getFabricTypeAll(request=request, response=response)
 
+@app.get("/order/jenis-bahan-logo", status_code=200)
+def order(request: Request, response: Response):
+    return getLogoTypeAll(request=request, response=response)
+
 @app.get("/order/warna", status_code=200)
 def order(request: Request, response: Response):
     return getColorAll(request=request, response=response)
 
 @app.post("/order/submit", status_code=200)
-def submitOrder(request: Request, response: Response, jenisbahan: Annotated[int, Form()], warna: Annotated[int, Form()], xl: Annotated[int, Form()], l: Annotated[int, Form()], m: Annotated[int, Form()], s: Annotated[int, Form()], image: UploadFile = File(...)):
-    return addOrder(request=request, response=response, jenisbahan=jenisbahan, warna=warna, xl=xl, l=l, m=m, s=s, image=image)
+def submitOrder(request: Request, response: Response, jenisproduk: Annotated[int, Form()], jenisbahan: Annotated[int, Form()], warna: Annotated[int, Form()], jenislogo: Annotated[int, Form()], xxl:Annotated[int, Form()], xl: Annotated[int, Form()], l: Annotated[int, Form()], m: Annotated[int, Form()], s: Annotated[int, Form()], image: UploadFile = File(...)):
+    return addOrder(request=request, response=response, jenisproduk=jenisproduk, jenisbahan=jenisbahan, warna=warna, jenislogo=jenislogo, xxl=xxl, xl=xl, l=l, m=m, s=s, image=image)
 
 # @app.get("/cart", status_code=200)
 # async def cart(request: Request, response: Response):
@@ -92,13 +96,13 @@ async def test(request: Request, response: Response):
     }
 
 @app.post("/test/upload")
-async def testUpload(request: Request, response: Response, file:UploadFile):
+def testUpload(request: Request, response: Response, file:UploadFile):
     file_path = os.getcwd()
     file_path = os.path.join(file_path, "test.txt")
     try:
         # Read the file and write it to the specified path
         with open(file_path, "wb") as f:
-            f.write(await file.read())
+            f.write(file.file.read())
 
         return {
             "filename": file.filename,
