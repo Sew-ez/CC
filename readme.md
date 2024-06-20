@@ -169,3 +169,38 @@
 ```
 
 <br>
+
+### [ List Jenis Bahan Logo ]
+
+**URL:** `https://api.sewez.shop/order/jenis-bahan-logo`
+
+**Method:** `GET`
+
+**Header:**
+
+- `Authorization` (String) - Bearer
+
+**Response Example:**
+
+```json
+{
+    "error": false,
+    "message": "Logo type fetch successfully",
+    "data": [
+        {
+            "id": 1,
+            "type": "DTF"
+        },
+        {
+            "id": 2,
+            "type": "Rubber"
+        },
+        {
+            "id": 3,
+            "type": "Plastisol"
+        }
+    ]
+}
+```
+
+<br>
