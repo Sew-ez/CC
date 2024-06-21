@@ -184,7 +184,6 @@ def inferCalculateLogo(imagePath, savePath, model, dataset_val):
         # convert relative unit to cm
         tShirtHeightCM = 71
         ratioToCM = tShirtHeightCM/tShirt["dimension"]["y"]
-        print(ratioToCM)
         tShirtWidthCM = ratioToCM * tShirt["dimension"]["x"]
         tShirtAreaCM = tShirtHeightCM * tShirtWidthCM
         tShirtMaskAreaCM = (ratioToCM**2) * tShirt["dimension"]["maskArea"]
@@ -215,9 +214,6 @@ def inferCalculateLogo(imagePath, savePath, model, dataset_val):
             "logos": associated_logos
         }
         grouped_result.append(tshirt_with_logos)
-    
-    print(grouped_result)
-    print("Terdeteksi", len(detected_tshirts), " Tshirt dan ", len(detected_logos), " Logo")
     detectionData = {
         "numberOfTshirt": len(detected_tshirts),
         "numberOfLogos": len(detected_logos),
@@ -227,7 +223,6 @@ def inferCalculateLogo(imagePath, savePath, model, dataset_val):
 
 def calculateLogo(imagePath, savePath, model, dataset_val):
     data = inferCalculateLogo(imagePath=imagePath, savePath=savePath, model=model, dataset_val=dataset_val)
-    print(data)
     logoData = data["data"]
     logoReformat = []
     for item in logoData:

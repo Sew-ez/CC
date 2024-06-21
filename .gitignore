@@ -8,6 +8,7 @@ index.html
 .user.ini
 .htaccess
 .vscode/
+*.h5
 
 ### Django ###
 *.log
