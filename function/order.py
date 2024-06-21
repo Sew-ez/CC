@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response, Request, status, UploadFile, File
 from function.database import runDB, DBtoDict
 from function.auth import authCheck, randomGenerator
+from function.auth import authCheck, randomGenerator
 from function.classes import OrderForm, CartForm
 from runtime.logoDetector.main import calculateLogo
 import json, os
@@ -12,6 +13,7 @@ def getCart(request: Request, response: Response):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
+            "error": True,
             "error": True,
             "message": "Unauthorized"
         }
@@ -65,6 +67,7 @@ def getOrderForm(request: Request, response: Response, productType: int):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
+            "error": True,
             "error": True,
             "message": "Unauthorized"
         }
@@ -166,6 +169,7 @@ def getFabricTypeAll(request: Request, response: Response):
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
             "error": True,
+            "error": True,
             "message": "Unauthorized"
         }
     fabric_type_query, fabric_type_column = runDB("SELECT * FROM stock_fabric")
@@ -218,7 +222,40 @@ def getLogoTypeAll(request: Request, response: Response):
         return {
             "error": True,
             "message": "No logo type available"
+            "message": "No fabric type available"
         }
+
+def getLogoTypeAll(request: Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
+    auth = authCheck(sessionToken)
+    print(auth)
+    if not auth["login"]:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {
+            "error": True,
+            "message": "Unauthorized"
+        }
+    fabric_type_query, fabric_type_column = runDB("SELECT * FROM logo_type")
+    jenisData = DBtoDict(fabric_type_query, fabric_type_column)
+    if len(jenisData)>0:
+        listJenis = []
+        for row in jenisData:
+            listJenis.append({
+                "id": row['id'],
+                "type": row['type']
+                })
+        jenis = {
+            "error": False,
+            "message": "Logo type fetch successfully",
+            "data":listJenis
+        }
+        return jenis
+    else:
+        return {
+            "error": True,
+            "message": "No logo type available"
+        }
+
 
 def getColorAll(request: Request, response: Response):
     sessionToken = request.headers.get("Authorization")
@@ -227,6 +264,7 @@ def getColorAll(request: Request, response: Response):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
+            "error": True,
             "error": True,
             "message": "Unauthorized"
         }
@@ -258,6 +296,7 @@ def addOrder(request: Request, response: Response, jenisproduk:int, jenisbahan:i
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
+            "error": True,
             "error": True,
             "message": "Unauthorized"
         }
@@ -432,6 +471,10 @@ def addOrder(request: Request, response: Response, jenisproduk:int, jenisbahan:i
         "error": False,
         "message": "Order added successfully",
         "data": {
+            "jenisbahan": fabricData[0]["fabricType"],
+            "warna": fabricData[0]["fabricColor"],
+            "jenislogo": logoData[0]["logoType"],
+            "xxl": xxl,
             "jenisbahan": fabricData[0]["fabricType"],
             "warna": fabricData[0]["fabricColor"],
             "jenislogo": logoData[0]["logoType"],
