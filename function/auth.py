@@ -154,6 +154,7 @@ def authCheck(sessionToken:str = ""):
                 "message": "Success",
                 "login": True,
                 "loginResult": {
+                    "userIn": user[0]['id'],
                     "userId": user[0]['uniqueId'],
                     "name": user[0]['name'],
                     "email": user[0]['email'],

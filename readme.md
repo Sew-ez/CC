@@ -238,6 +238,7 @@
         "jenisbahan": "Combed 30s",
         "warna": "Hitam",
         "jenislogo": "DTF",
+        "xxl": 0,
         "xl": 100,
         "l": 120,
         "m": 30,

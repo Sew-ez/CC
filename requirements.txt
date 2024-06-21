@@ -3,3 +3,11 @@ mysql-connector-python
 bcrypt
 python-dotenv
 python-multipart
+
+# Tensorflow
+Tensorflow==2.15.0
+numpy
+scikit-image
+opencv-python
+matplotlib
+

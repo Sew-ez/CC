@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Response, Request, status, UploadFile, File
 from function.database import runDB, DBtoDict
-from function.auth import authCheck
+from function.auth import authCheck, randomGenerator
 from function.classes import OrderForm, CartForm
+from runtime.logoDetector.main import calculateLogo
 import json, os
 
 def getCart(request: Request, response: Response):
@@ -11,7 +12,7 @@ def getCart(request: Request, response: Response):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
     cart_query, cart_column = runDB("""
@@ -64,7 +65,7 @@ def getOrderForm(request: Request, response: Response, productType: int):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
     stock_query, stock_column = runDB("""
@@ -136,7 +137,7 @@ def pushCart(request: Request, response: Response, cartForm: CartForm):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
     sessionToken = auth["sessionToken"]
@@ -164,7 +165,7 @@ def getFabricTypeAll(request: Request, response: Response):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
     fabric_type_query, fabric_type_column = runDB("SELECT * FROM stock_fabric")
@@ -185,9 +186,40 @@ def getFabricTypeAll(request: Request, response: Response):
     else:
         return {
             "error": True,
-            "message": "No jenis available"
+            "message": "No fabric type available"
         }
-    
+
+def getLogoTypeAll(request: Request, response: Response):
+    sessionToken = request.headers.get("Authorization")
+    auth = authCheck(sessionToken)
+    print(auth)
+    if not auth["login"]:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {
+            "error": True,
+            "message": "Unauthorized"
+        }
+    fabric_type_query, fabric_type_column = runDB("SELECT * FROM logo_type")
+    jenisData = DBtoDict(fabric_type_query, fabric_type_column)
+    if len(jenisData)>0:
+        listJenis = []
+        for row in jenisData:
+            listJenis.append({
+                "id": row['id'],
+                "type": row['type']
+                })
+        jenis = {
+            "error": False,
+            "message": "Logo type fetch successfully",
+            "data":listJenis
+        }
+        return jenis
+    else:
+        return {
+            "error": True,
+            "message": "No logo type available"
+        }
+
 def getColorAll(request: Request, response: Response):
     sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
@@ -195,7 +227,7 @@ def getColorAll(request: Request, response: Response):
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
     color_query, color_column = runDB("SELECT * FROM stock_color")
@@ -220,48 +252,197 @@ def getColorAll(request: Request, response: Response):
             "message": "No color available"
         }
     
-def addOrder(request: Request, response: Response, jenisbahan:int, warna:int, xl:int, l:int, m:int, s:int, image: UploadFile = File(...)):
+def addOrder(request: Request, response: Response, jenisproduk:int, jenisbahan:int, warna:int, jenislogo:int, xxl:int, xl:int, l:int, m:int, s:int, image: UploadFile, dataset_val, model):
     sessionToken = request.headers.get("Authorization")
     auth = authCheck(sessionToken)
     if not auth["login"]:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {
-            "status": 401,
+            "error": True,
             "message": "Unauthorized"
         }
+    if not image.content_type == "image/jpeg":
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {
+            "error": True,
+            "message": "Image type not supported"
+        }
+    
+    #Generate Order ID
+    orderId = randomGenerator(15)
+
+    # Save image
+    imageName = str(auth["loginResult"]["userId"] + "-" + orderId + ".jpg")
+    imagePath = os.path.join(os.getcwd(), "static/uploads/order/", imageName)
+    savePath = os.path.join(os.getcwd(), "static/generated/order/", imageName)
+    try:
+        # Read the file and write it to the specified path
+        with open(imagePath, "wb") as f:
+            f.write(image.file.read())
+    except Exception as e:
+        return {
+            "error": True,
+            "message": str(e)
+        }
+    
+    # Detect logo
+    detectionData = calculateLogo(imagePath=imagePath, savePath=savePath, model=model, dataset_val=dataset_val)
+    if detectionData["error"]:
+        return detectionData
+
+    tshirtSizes = {}
+    if(s>0):
+        tshirtSizes["s"] = s
+    if(m>0):
+        tshirtSizes["m"] = m
+    if(l>0):
+        tshirtSizes["l"] = l
+    if(xl>0):
+        tshirtSizes["xl"] = xl
+    if(xxl>0):
+        tshirtSizes["xxl"] = xxl
+    if len(tshirtSizes) == 0:
+        return {
+            "error": True,
+            "message": "No size selected"
+        }
+
+    # Create new order
+    order_query, order_column = runDB("""
+                                        INSERT INTO `order` (uniqueId, `user`, mockup)
+                                        VALUES (
+                                            %s,
+                                            (SELECT id FROM auth_user WHERE sessionToken = %s),
+                                            %s
+                                        )
+                                    """, (orderId, auth["loginResult"]["token"], imageName))
+    order_query, order_column = runDB("""
+                                        SELECT * FROM `order` WHERE uniqueId = %s
+                                    """, (orderId,))
+    order = DBtoDict(order_query, order_column)
+    if len(order) == 0:
+        return {
+            "error": True,
+            "message": "Order not inserted"
+        }
+
+    # Create new logo order
+    for logo in detectionData["data"]["logo"]:
+        logoXLength = min(logo["x"], logo["y"])
+        logoYLength = max(logo["x"], logo["y"])
+        logo_query, logo_column = runDB("""
+                                        INSERT INTO order_logo (`order`, logo)
+                                        VALUES (
+                                            (SELECT id FROM `order` WHERE uniqueId = %s),
+                                            (SELECT logo.id AS id FROM logo
+                                            LEFT JOIN logo_size ON logo.size = logo_size.id
+                                            LEFT JOIN logo_type ON logo.`type` = logo_type.id
+                                            WHERE Y >= %s AND X >= %s  AND logo.`type` = %s
+                                            order BY Y ASC
+                                            LIMIT 1)
+                                        )
+                                    """, (orderId, logoYLength, logoXLength, jenislogo))
+        logo_query, logo_column = runDB("""
+                                        SELECT * FROM order_logo WHERE `order` = (SELECT id FROM `order` WHERE uniqueId = %s)
+                                    """, (orderId,))
+        logo = DBtoDict(logo_query, logo_column)
+        if len(logo) == 0:
+            return {
+                "error": True,
+                "message": "Logo not inserted"
+            }
+
+    # iterate through sizes
+    for size in tshirtSizes:
+        # insert order item
+        order_item_query, order_item_column = runDB("""
+                                        INSERT INTO order_item (`order`, stock, quantity)
+                                        VALUES (
+                                            (SELECT id FROM `order` WHERE uniqueId = %s),
+                                            (SELECT id FROM stock WHERE `type` = %s AND color = %s AND size = (SELECT id FROM stock_size WHERE size = %s) AND fabric = %s),
+                                            %s
+                                        )
+                                    """, (orderId, jenisproduk, warna, size, jenisbahan, tshirtSizes[size]))
+        # check if order item inserted
+        order_item_query, order_item_column = runDB("""
+                                                    SELECT * FROM order_item WHERE `order` = (SELECT id FROM `order` WHERE uniqueId = %s)
+                                                    """, (orderId,))
+        order_item = DBtoDict(order_item_query, order_item_column)
+        if len(order_item) == 0:
+            return {
+                "error": True,
+                "message": "Order item not inserted"
+            }
+        
+    # calculate total price
+    ## Fabric price
+    fabric_query, fabric_column = runDB("""
+                                                        SELECT 
+                                                            `order`.id,
+                                                            `order`.uniqueId,
+                                                            order_item.quantity AS quantity,
+                                                            stock_type.`type` AS fabricType,
+                                                            stock_size.size AS fabricSize,
+                                                            stock_color.color AS fabricColor,
+                                                            stock_color.hexadecimal AS fabrichexColor,
+                                                            stock.price AS fabricPrice
+                                                        FROM order_item
+                                                        LEFT JOIN `order` ON `order`.id = order_item.`order`
+                                                        LEFT JOIN stock ON stock.id = order_item.stock
+                                                        LEFT JOIN stock_color ON stock_color.id = stock.color
+                                                        LEFT JOIN stock_type ON stock_type.id = stock.`type`
+                                                        LEFT JOIN stock_size ON stock_size.id = stock.size
+                                                        LEFT JOIN stock_fabric ON stock_fabric.id = stock.fabric
+                                                        WHERE `order`.uniqueId = %s;
+                                                    """, (orderId,))
+    fabricData = DBtoDict(fabric_query, fabric_column)
+    totalFabricQty = 0
+    totalFabricPrice = 0
+    for fabric in fabricData:
+        totalFabricQty += fabric["quantity"]
+        totalFabricPrice += fabric["quantity"] * fabric["fabricPrice"]
+    
+    ## Logo price
+    logo_query, logo_column = runDB("""
+                                                    SELECT 
+                                                        `order`.id,
+                                                        `order`.uniqueId,
+                                                        order_logo.logo AS logoId,
+                                                        logo_size.size AS logoSize,
+                                                        logo_type.type AS logoType,
+                                                        logo.price AS logoPrice
+                                                    FROM order_logo
+                                                    LEFT JOIN `order` ON `order`.id = order_logo.`order`
+                                                    LEFT JOIN logo ON logo.id = order_logo.logo
+                                                    LEFT JOIN logo_size ON logo_size.id = logo.size
+                                                    LEFT JOIN logo_type ON logo_type.id = logo.`type`
+                                                    WHERE `order`.uniqueId = %s;
+                                                """, (orderId,))
+    logoData = DBtoDict(logo_query, logo_column)
+    totalLogoQty = 0
+    totalLogoPrice = 0
+    for logo in logoData:
+        totalLogoQty += 1
+        totalLogoPrice += logo["logoPrice"] * totalFabricQty
+
+    # imagePath
+    imagePath = os.path.join(str(os.getenv("BASE_URL")), "static/generated/order/", imageName)
+
     return {
         "error": False,
         "message": "Order added successfully",
         "data": {
-            "jenisbahan": jenisbahan,
-            "warna": warna,
+            "jenisbahan": fabricData[0]["fabricType"],
+            "warna": fabricData[0]["fabricColor"],
+            "jenislogo": logoData[0]["logoType"],
+            "xxl": xxl,
             "xl": xl,
             "l": l,
             "m": m,
             "s": s,
-            "image": image
+            "totalFabricPrice": totalFabricPrice,
+            "totalLogoPrice": totalLogoPrice,
+            "totalPrice": totalFabricPrice + totalLogoPrice,
+            "image": imagePath,
         }
     }
-    # order_query, order_column = runDB("""
-    #                                     INSERT INTO order_cart (user, stock, quantity, price)
-    #                                     VALUES (
-    #                                         (SELECT id FROM auth_user WHERE sessionToken = %s),
-    #                                         (SELECT id FROM stock WHERE `type` = %s AND color = %s AND size = %s AND fabric = %s),
-    #                                         %s,
-    #                                         %s
-    #                                     )
-    #                                 """, (auth["sessionToken"], jenisbahan, warna, xl, l, m, s, image))
-    # return {
-    #     "error": False,
-    #     "message": "Order added successfully"
-    # }
-
-# {
-#     "jenisbahan": 1,
-#     "warna": 1,
-#     "xl": 0,
-#     "l": 0,
-#     "m": 0,
-#     "s": 10,
-#     "image": FILE
-# }
