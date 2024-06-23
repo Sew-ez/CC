@@ -41,12 +41,39 @@ model, dataset_val = loadLogoDetector()
 #################################################################
 #                         START API                             #
 #################################################################
-
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 #################################################################
-#                              AUTH                             #
+#                           INTRO                               #
+#################################################################
+@app.get("/", status_code=200, response_description="Sae-sae Mawon")
+def intro(request: Request, response: Response):
+    headers = [f"Connection ID: {request.headers.get('cf-ray')}",
+               f"- IP Address : {request.headers.get('cf-connecting-ip')}",
+               f"- Country    : {request.headers.get('cf-ipcountry')}"]
+    for i in range(len(headers)):
+        if len(headers[i]) < 48:
+            headers[i] += " " * (48 - len(headers[i]))
+        print(len(headers[i]))
+    return {
+        "101":"███████╗███████╗██╗    ██╗      ███████╗███████╗",
+        "102":"██╔════╝██╔════╝██║    ██║      ██╔════╝╚══███╔╝",
+        "103":"███████╗█████╗  ██║ █╗ ██║█████╗█████╗    ███╔╝ ",
+        "104":"╚════██║██╔══╝  ██║███╗██║╚════╝██╔══╝   ███╔╝  ",
+        "105":"███████║███████╗╚███╔███╔╝      ███████╗███████╗",
+        "106":"╚══════╝╚══════╝ ╚══╝╚══╝       ╚══════╝╚══════╝",
+        "107":"                                                ",
+        "108":"######### WELCOME TO SEWEZ BACKEND API #########",
+        "109":"Server       : South East Asia                  ",
+        "110":headers[0],
+        "111":"Your Info                                       ",
+        "112":headers[1],
+        "113":headers[2],
+    }
+
+#################################################################
+#                            AUTH                               #
 #################################################################
 @app.post("/auth/login", status_code=200)
 def login(response: Response, loginForm: LoginForm):
