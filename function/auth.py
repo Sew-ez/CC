@@ -140,7 +140,6 @@ def authCheck(sessionToken:str = ""):
     sessionToken = str(sessionToken[len("Bearer "):])
     user_query, user_column = runDB("SELECT * FROM Auth_User WHERE sessionToken = %s", (sessionToken,))
     user = DBtoDict(user_query, user_column)
-    print(user)
     if len(user) > 0:
         baseUrl = os.getenv("BASE_URL")
         userUniqueId = user[0]['uniqueId']

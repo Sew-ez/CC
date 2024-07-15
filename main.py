@@ -55,7 +55,6 @@ def intro(request: Request, response: Response):
     for i in range(len(headers)):
         if len(headers[i]) < 48:
             headers[i] += " " * (48 - len(headers[i]))
-        print(len(headers[i]))
     return {
         "101":"███████╗███████╗██╗    ██╗      ███████╗███████╗",
         "102":"██╔════╝██╔════╝██║    ██║      ██╔════╝╚══███╔╝",
